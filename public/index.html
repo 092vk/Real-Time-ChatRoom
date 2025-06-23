@@ -6,10 +6,10 @@
 </head>
 <body>
 
-  <h2>Chat App</h2>
+  <h2 class="heading">Chat Room</h2>
   <div class="Welcome">
     <h3>Welcome to the server </h3>
-    <p>Join the Game server and become the ultimate player</p>
+    <p>Join the Sherlock server and become the ultimate game player</p>
   </div>
 
   <div id="rejoin" style="display:none;">
@@ -33,7 +33,9 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+
     console.log("script is running")
+
     let socket = io('http://localhost:5757');
 
     document.getElementById('join').onclick = () => {
