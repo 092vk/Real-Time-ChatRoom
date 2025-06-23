@@ -2,9 +2,10 @@
 
 # How to run:
 
-npm run dev
-or
-node server.js
+1. Add the env variables for the postgresql db 
+2. npm run dev
+  or
+  node server.js
 
 TechStack: 
 -> NodeJs
