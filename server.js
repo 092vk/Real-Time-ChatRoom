@@ -1,16 +1,22 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require("socket.io");
-const path = require('path');
-const db = require('./models');
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from "socket.io";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import db from './models/index.js';
+import socketHandler from './sockets/socketHandler.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 const io = new Server(server);
 
-app.use(express.static(path.join(__dirname, 'public')));
+// serving the frontend for monolithic architecture
+app.use(express.static(join(__dirname, 'public')));
 
-require('./sockets/socketHandler')(io, db);
+socketHandler(io, db);
 
 db.sequelize.sync().then(() => {
   console.log("Database synced");

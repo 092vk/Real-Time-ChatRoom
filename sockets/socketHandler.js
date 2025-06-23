@@ -1,19 +1,16 @@
-module.exports = (io, db) => {
+export default (io, db) => {
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     socket.on('joinRoom', async ({ roomName, nickname }) => {
-      // Ensure User exists
       let [user] = await db.User.findOrCreate({ where: { nickname } });
       
-      // Ensure Room exists
       let [room] = await db.Room.findOrCreate({ where: { name: roomName } });
 
       socket.user = user;
       socket.room = room;
       socket.join(room.id.toString());
 
-      // Send chat history
       let messages = await db.Message.findAll({
         where: { RoomId: room.id },
         include: db.User,
