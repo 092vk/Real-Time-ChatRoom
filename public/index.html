@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat App</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+  </style>
+</head>
+<body>
+
+  <h2>Chat App</h2>
+  <div class="Welcome">
+    <h3>Welcome to the server </h3>
+    <p>Join the Game server and become the ultimate player</p>
+  </div>
+
+  <div id="rejoin" style="display:none;">
+    <h2>Rejoin the server</h2>
+    <button id="reconnect">Rejoin</button>
+  </div>
+
+  <div id="setup">
+    <input id="nickname" placeholder="Enter nickname" /><br/>
+    <input id="room" placeholder="Enter or create room" /><br/>
+    <button id="join">Join Room</button>
+    <button id="disconnect">Disconnect from the Server</button>
+  </div>
+
+  <div id="chatArea" style="display:none;">
+    <div id="chat"></div>
+    <input id="messageInput" placeholder="Type a message" />
+    <button id="send">Send</button>
+    <button id="leave">Leave Room</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    console.log("script is running")
+    let socket = io('http://localhost:5757');
+
+    document.getElementById('join').onclick = () => {
+      console.log("join was clicked")
+      const nickname = document.getElementById('nickname').value;
+      const roomName = document.getElementById('room').value;
+      if (!nickname || !roomName) return alert("Please fill both fields");
+
+      socket.emit('joinRoom', { roomName, nickname });
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('chatArea').style.display = 'block';
+    };
+
+    socket.on('userJoined', msg => {
+      addMessage(`[INFO] ${msg}`);
+    });
+
+    socket.on('userLeft', msg => {
+      addMessage(`[INFO] ${msg}`);
+    });
+
+    socket.on('userDisconnected', msg => {
+      addMessage(`[INFO] ${msg}`);
+    });
+
+    socket.on('chatHistory', (messages) => {
+        messages.forEach(m => addMessage(`${m.sender}: ${m.message}`));
+    });
+
+    document.getElementById('send').onclick = () => {
+      const message = document.getElementById('messageInput').value;
+      if (!message) return;
+      socket.emit('sendMessage', message);
+      document.getElementById('messageInput').value = '';
+    };
+
+    document.getElementById('leave').onclick = () => {
+        socket.emit('leaveRoom');
+        document.getElementById('chatArea').style.display = 'none';
+        document.getElementById('setup').style.display = 'block';
+        document.getElementById('chat').innerHTML = '';
+        document.getElementById('messageInput').value = '';
+    };
+
+    socket.on('receiveMessage', data => {
+      addMessage(`${data.sender}: ${data.message}`);
+    });
+
+    function addMessage(msg) {
+      const chat = document.getElementById('chat');
+      chat.innerHTML += msg + '<br/>';
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    document.getElementById('disconnect').onclick = () => {
+        socket.disconnect();
+        alert("Disconnected from server");
+        document.getElementById('chatArea').style.display = 'none';
+        document.getElementById('setup').style.display = 'none';
+        document.getElementById('rejoin').style.display = 'block';
+        document.getElementById('chat').innerHTML = '';
+        document.getElementById('messageInput').value = '';
+    };
+
+    document.getElementById('reconnect').onclick = () => {
+        socket = io('http://localhost:5757');
+        document.getElementById('chatArea').style.display = 'none';
+        document.getElementById('setup').style.display = 'block';
+        alert("Reconnected with the server");
+        document.getElementById('rejoin').style.display = 'none';
+        document.getElementById('nickname').value='';
+        document.getElementById('room').value='';
+    };
+
+  </script>
+
+</body>
+</html>
