@@ -12,7 +12,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 require('./sockets/socketHandler')(io, db);
 
-// Sync database
 db.sequelize.sync().then(() => {
   console.log("Database synced");
   server.listen(5757, () => console.log('Server listening on http://localhost:5757'));
